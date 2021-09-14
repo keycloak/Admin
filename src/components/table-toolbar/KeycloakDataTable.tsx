@@ -36,7 +36,7 @@ type BaseRow<T> = {
 
 type Row<T> = BaseRow<T> & {
   selected: boolean;
-  isOpen: boolean;
+  isOpen?: boolean;
   disableSelection: boolean;
   disableActions: boolean;
 };
@@ -203,6 +203,15 @@ export function KeycloakDataTable<T>({
   const [key, setKey] = useState(0);
   const refresh = () => setKey(new Date().getTime());
 
+  const renderCell = (columns: (Field<T> | DetailField<T>)[], value: T) => {
+    return columns.map((col) => {
+      if (col.cellRenderer) {
+        return { title: col.cellRenderer(value) };
+      }
+      return _.get(value, col.name);
+    });
+  };
+
   const convertToColumns = (data: T[]): (Row<T> | SubRow<T>)[] => {
     return data
       .map((value, index) => {
@@ -215,24 +224,14 @@ export function KeycloakDataTable<T>({
             selected: !!selected.find(
               (v) => _.get(v, "id") === _.get(value, "id")
             ),
-            isOpen: false,
-            cells: columns.map((col) => {
-              if (col.cellRenderer) {
-                return { title: col.cellRenderer(value) };
-              }
-              return _.get(value, col.name);
-            }),
+            isOpen: detailColumns?.[0]?.enabled?.(value) ? false : undefined,
+            cells: renderCell(columns, value),
           },
         ];
         if (detailColumns?.[0]?.enabled?.(value)) {
           row.push({
             parent: index * 2,
-            cells: detailColumns!.map((col) => {
-              if (col.cellRenderer) {
-                return { title: col.cellRenderer(value) };
-              }
-              return _.get(value, col.name);
-            }),
+            cells: renderCell(detailColumns, value),
           } as SubRow<T>);
         }
         return row;
@@ -247,13 +246,11 @@ export function KeycloakDataTable<T>({
     if (node instanceof Array) {
       return node.map(getNodeText).join("");
     }
-    if (typeof node === "object" && node) {
+    if (typeof node === "object") {
       return getNodeText(
         isValidElement((node as TitleCell).title)
-          ? (node as TitleCell).title.props.children
+          ? (node as TitleCell).title.props?.children
           : (node as TitleCell).title
-          ? (node as TitleCell).title
-          : (node as JSX.Element).props?.children
       );
     }
     return "";
@@ -403,7 +400,7 @@ export function KeycloakDataTable<T>({
               onCollapse={detailColumns ? onCollapse : undefined}
               actions={convertAction()}
               actionResolver={actionResolver}
-              rows={data.slice(0, max)}
+              rows={!detailColumns ? data.slice(0, max) : data}
               columns={columns}
               isNotCompact={isNotCompact}
               isRadio={isRadio}
