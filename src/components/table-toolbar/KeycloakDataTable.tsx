@@ -213,6 +213,8 @@ export function KeycloakDataTable<T>({
   };
 
   const convertToColumns = (data: T[]): (Row<T> | SubRow<T>)[] => {
+    const isDetailColumnsEnabled = (value: T) =>
+      detailColumns?.[0]?.enabled?.(value);
     return data
       .map((value, index) => {
         const disabledRow = isRowDisabled ? isRowDisabled(value) : false;
@@ -224,14 +226,14 @@ export function KeycloakDataTable<T>({
             selected: !!selected.find(
               (v) => _.get(v, "id") === _.get(value, "id")
             ),
-            isOpen: detailColumns?.[0]?.enabled?.(value) ? false : undefined,
+            isOpen: isDetailColumnsEnabled(value) ? false : undefined,
             cells: renderCell(columns, value),
           },
         ];
-        if (detailColumns?.[0]?.enabled?.(value)) {
+        if (isDetailColumnsEnabled(value)) {
           row.push({
             parent: index * 2,
-            cells: renderCell(detailColumns, value),
+            cells: renderCell(detailColumns!, value),
           } as SubRow<T>);
         }
         return row;
