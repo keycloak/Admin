@@ -362,21 +362,23 @@ export function KeycloakDataTable<T>({
     onSelect!(selectedRows);
   };
 
-  const data = filteredData || rows;
-
   const onCollapse = (isOpen: boolean, rowIndex: number) => {
     (data![rowIndex] as Row<T>).isOpen = isOpen;
     setRows([...data!]);
   };
 
+  const data = filteredData || rows;
   const noData = !data || data.length === 0;
   const searching = search !== "" || isSearching;
+  // if we use detail columns there are twice the number of rows
+  const maxRows = detailColumns ? max * 2 : max;
+  const rowLength = detailColumns ? (data?.length || 0) / 2 : data?.length || 0;
 
   return (
     <>
       {(loading || !noData || searching) && (
         <PaginatingTableToolbar
-          count={data?.length || 0}
+          count={rowLength}
           first={first}
           max={max}
           onNextClick={setFirst}
@@ -402,7 +404,7 @@ export function KeycloakDataTable<T>({
               onCollapse={detailColumns ? onCollapse : undefined}
               actions={convertAction()}
               actionResolver={actionResolver}
-              rows={!detailColumns ? data.slice(0, max) : data}
+              rows={data.slice(0, maxRows)}
               columns={columns}
               isNotCompact={isNotCompact}
               isRadio={isRadio}
