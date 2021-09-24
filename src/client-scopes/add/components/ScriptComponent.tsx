@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { FormGroup } from "@patternfly/react-core";
@@ -20,7 +20,20 @@ export const ScriptComponent = ({
     <FormGroup
       label={t(label!)}
       labelIcon={
-        <HelpItem helpText={t(helpText!)} forLabel={t(label!)} forID={name!} />
+        <HelpItem
+          helpText={
+            <span>
+              {helpText?.split("\n").map((item, key) => (
+                <Fragment key={key}>
+                  {item}
+                  <br />
+                </Fragment>
+              ))}
+            </span>
+          }
+          forLabel={t(label!)}
+          forID={name!}
+        />
       }
       fieldId={name!}
     >
