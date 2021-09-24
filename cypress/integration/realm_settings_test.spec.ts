@@ -129,12 +129,11 @@ describe("Realm settings tests", () => {
     it("Check login tab values", () => {
       sidebarPage.goToRealmSettings();
       cy.findByTestId("rs-login-tab").click();
-  
+
       cy.get("#kc-user-reg-switch-off").should("be.visible");
       cy.get("#kc-forgot-pw-switch-off").should("be.visible");
       cy.get("#kc-remember-me-switch-off").should("not.be.visible");
     });
-  
 
     it("Go to email tab", () => {
       sidebarPage.goToRealmSettings();
