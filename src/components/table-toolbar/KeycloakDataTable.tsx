@@ -203,14 +203,13 @@ export function KeycloakDataTable<T>({
   const [key, setKey] = useState(0);
   const refresh = () => setKey(new Date().getTime());
 
-  const renderCell = (columns: (Field<T> | DetailField<T>)[], value: T) => {
-    return columns.map((col) => {
+  const renderCell = (columns: (Field<T> | DetailField<T>)[], value: T) =>
+    columns.map((col) => {
       if (col.cellRenderer) {
         return { title: col.cellRenderer(value) };
       }
       return _.get(value, col.name);
     });
-  };
 
   const convertToColumns = (data: T[]): (Row<T> | SubRow<T>)[] => {
     const isDetailColumnsEnabled = (value: T) =>
