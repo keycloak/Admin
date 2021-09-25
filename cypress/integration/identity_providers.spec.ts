@@ -1,7 +1,11 @@
 import Masthead from "../support/pages/admin_console/Masthead";
 import SidebarPage from "../support/pages/admin_console/SidebarPage";
 import LoginPage from "../support/pages/LoginPage";
-import { keycloakBefore } from "../support/util/keycloak_before";
+import {
+  keycloakBefore,
+  keycloakBeforeEach,
+  TEST_REALM,
+} from "../support/util/keycloak_hooks";
 import ListingPage from "../support/pages/admin_console/ListingPage";
 
 import CreateProviderPage from "../support/pages/admin_console/manage/identity_providers/CreateProviderPage";
@@ -33,10 +37,13 @@ describe("Identity provider test", () => {
 
   describe("Identity provider creation", () => {
     const identityProviderName = "github";
-
-    beforeEach(function () {
+    before(() => {
       keycloakBefore();
       loginPage.logIn();
+    });
+
+    beforeEach(() => {
+      keycloakBeforeEach();
       sidebarPage.goToIdentityProviders();
     });
 
@@ -74,21 +81,24 @@ describe("Identity provider test", () => {
       sidebarPage.goToIdentityProviders();
       listingPage.itemExist(identityProviderName);
 
+      const url = `/auth/admin/realms/${TEST_REALM}/identity-provider/instances`;
+      cy.intercept({ method: "POST", url }).as("post");
+
       createProviderPage
         .clickCreateDropdown()
         .clickItem("bitbucket")
         .fill("bitbucket", "123")
         .clickAdd();
 
-      cy.wait(2000);
-
+      cy.wait("@post");
       sidebarPage.goToIdentityProviders();
+
       listingPage.itemExist(identityProviderName);
 
       orderDialog.openDialog().checkOrder(providers);
       orderDialog.moveRowTo("facebook", identityProviderName);
 
-      orderDialog.checkOrder(["bitbucket", identityProviderName, "facebook"]);
+      orderDialog.checkOrder(["facebook", identityProviderName, "bitbucket"]);
 
       orderDialog.clickSave();
       masthead.checkNotificationMessage(changeSuccessMsg);

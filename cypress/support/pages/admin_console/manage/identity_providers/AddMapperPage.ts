@@ -1,3 +1,5 @@
+import { TEST_REALM } from "../../../../util/keycloak_hooks";
+
 export default class AddMapperPage {
   private mappersTab = "mappers-tab";
   private noMappersAddMapperButton = "no-mappers-empty-action";
@@ -70,14 +72,17 @@ export default class AddMapperPage {
   }
 
   addRoleToMapperForm() {
-    const load = "/auth/admin/realms/master/roles";
+    const load = `/auth/admin/realms/${TEST_REALM}/roles`;
     cy.intercept(load).as("load");
 
     cy.get(this.radio).eq(0).check();
 
     cy.findByTestId(this.addAssociatedRolesModalButton).contains("Add").click();
 
-    cy.findByTestId(this.mapperRoleInput).should("have.value", "admin");
+    cy.findByTestId(this.mapperRoleInput).should(
+      "have.value",
+      "default-roles-test"
+    );
 
     return this;
   }

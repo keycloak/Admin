@@ -4,7 +4,10 @@ import UserEventsTab from "../support/pages/admin_console/manage/events/UserEven
 import AdminEventsTab from "../support/pages/admin_console/manage/events/AdminEventsTab";
 import RealmSettingsPage from "../support/pages/admin_console/manage/realm_settings/RealmSettingsPage";
 import Masthead from "../support/pages/admin_console/Masthead";
-import { keycloakBefore } from "../support/util/keycloak_before";
+import {
+  keycloakBefore,
+  keycloakBeforeEach,
+} from "../support/util/keycloak_hooks";
 
 const loginPage = new LoginPage();
 const sidebarPage = new SidebarPage();
@@ -15,10 +18,14 @@ const masthead = new Masthead();
 
 describe("Events tests", () => {
   describe("Search user events", () => {
-    beforeEach(() => {
+    before(() => {
       keycloakBefore();
       loginPage.logIn();
-      sidebarPage.goToEvents();
+    });
+
+    beforeEach(() => {
+      keycloakBeforeEach();
+      sidebarPage.goToRealm("Master").goToEvents();
     });
 
     it("Check search dropdown display", () => {
@@ -63,10 +70,14 @@ describe("Events tests", () => {
   });
 
   describe("Search admin events", () => {
-    beforeEach(() => {
+    before(() => {
       keycloakBefore();
       loginPage.logIn();
-      sidebarPage.goToEvents();
+    });
+
+    beforeEach(() => {
+      keycloakBeforeEach();
+      sidebarPage.goToRealm("Master").goToEvents();
       cy.findByTestId("admin-events-tab").click();
     });
 
@@ -105,10 +116,14 @@ describe("Events tests", () => {
   });
 
   describe("Check more button opens auth and representation dialogs", () => {
-    beforeEach(() => {
+    before(() => {
       keycloakBefore();
       loginPage.logIn();
-      sidebarPage.goToEvents();
+    });
+
+    beforeEach(() => {
+      keycloakBeforeEach();
+      sidebarPage.goToRealm("Master").goToEvents();
       cy.findByTestId("admin-events-tab").click();
     });
 
